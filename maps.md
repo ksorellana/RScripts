@@ -53,55 +53,28 @@ library(magrittr) #to keep things very tidy
 library(ggspatial) #for scale bars and arrows
 library(ggplot2) #for tidy plotting
 library(ggpubr) #for easy selection of symbols
-library(rnaturalearthhires)
-```
-
-Build map base layers
-
-```
-world <- ne_countries(scale = "medium", returnclass = "sf") #Mundo, para construir los mapas
 ```
 
 Define map area
 
+world <- ne_countries(scale = "medium", returnclass = "sf") #Mundo, para construir los mapas
+
 ```
-library(rnaturalearthhires)
 library(raster) #for processing some spatial data
 map <- ne_countries(scale = 10, returnclass = "sf")
-```
-
-Add map layers
-
-```
-map <- ne_countries(scale = 10, returnclass = "sf")
-states <- ne_states(returnclass = "sf")
-ocean <- ne_download(scale = 10, type = 'ocean', 
-                   category = 'physical', returnclass = 'sf')
-rivers <- ne_download(scale = 10, type = 'rivers_lake_centerlines', 
-                    category = 'physical', returnclass = 'sf')
-```
-
-Define focal area
-
-```
-focalArea <- map %>% filter(admin == "Guatemala")
-limit <- st_buffer(focalArea, dist = 1) %>% st_bbox()
-clipLimit <- st_buffer(focalArea, dist = 2) %>% st_bbox()
-limitExtent <- as(extent(clipLimit), 'SpatialPolygons')
-crs(limitExtent) <- "+proj=longlat +datum=WGS84 +no_defs"
 ```
 
 ### Example with Guatemala layers
 
 -Download "state" layer from DivaGis [(https://www.diva-gis.org/data)](https://www.diva-gis.org/data).
--Save files in our directory (recommendeded to create a folder directly in C://)
+-Save files in our directory (recommended to create a folder directly in C://)
 
 Open folder
 ```
 setwd("C://Coding")
 ```
 
-Add country, state, county, etc. layers
+To add country, state, county, etc. layers, just add the file with the name you prefer:
 
 ```
 gua_pais <- st_read("GTM_adm0.shp")
@@ -116,7 +89,7 @@ gua_lagos <- st_read("GTM_water_areas_dcw.shp")
 Add the layer that you want to use (states, counties, etc.)
 
 ```
-setwd("C://Coding")
+setwd("C://Coding") 
 gua_dep <- st_read("GTM_adm1.shp")
 ```
 
@@ -124,16 +97,16 @@ Add .csv file with 2 columns: state or county (for state use **NAME_1**, for cou
 Check that the names for states or counties are the same than in the DivaGis layer
 
 ```
-species <- read_csv("especies.csv")
+species <- read_csv("species.csv")
 species
-names(especies)
+names(species)
 ```
 
 Merge the file with the number of species with the map layer
 
 ```
 gua_dep_ant <- gua_dep %>%
-	left_join(especies)
+	left_join(species)
 ```	
   
 	###IF the columns in both files have different names, you can replace one of them with the following code:
@@ -155,13 +128,8 @@ names(gua_dep_ant)
 
 ```
 ggplot(data = world) +
-  geom_sf(fill="white")+
-	geom_sf(data = ocean, color = "blue", size = 0.05, fill = "#add8e6") +
-	geom_sf(data = focalArea, color = "black", size = 0.15,
-          linetype = "solid", fill = "white", alpha = 0.5) +
-	geom_sf(data=gua_dep, fill="white") +
 	geom_sf(data=gua_dep_ant, aes(fill=especies)) +
-	scale_fill_gradient ("Total de especies", high = "#A4C61A", low = "white") +
+	scale_fill_gradient ("Total of species", high = "#A4C61A", low = "white") +
 	 	labs( x = "Longitud", y = "Latitud") +
   coord_sf(xlim = c(-92.5, -88.1), ylim = c(13.8, 18.1), expand = T) +
   annotation_scale(location = "bl", width_hint = 0.3) +
@@ -206,11 +174,6 @@ head(anthrigt)
 
 ```
 ggplot(data = world) +
-  geom_sf(fill="white")+
-	geom_sf(data = ocean, color = "blue", size = 0.05, fill = "aliceblue") +
-	geom_sf(data = focalArea, color = "black", size = 0.15,
-          linetype = "solid", fill = "white", alpha = 0.5) +
-	geom_sf(data=gua_dep, fill="white") +
 	geom_sf(data=gua_dep_ant, aes(fill=especies), linetype="solid", size=0.3) +
 	scale_fill_gradient ("Species total", high = "#f5e267", low = "white") +
 geom_point(data = anthrigt, aes(x=decimalLongitude, y = decimalLatitude, color=Record, pch=Record), cex = 2) + #esta es la línea donde van los puntos, nombrar adecuadamente las columnas de lon y lat
@@ -222,6 +185,7 @@ geom_point(data = anthrigt, aes(x=decimalLongitude, y = decimalLatitude, color=R
                          pad_x = unit(0.75, "in"), pad_y = unit(0.3, "in"),
                          style = north_arrow_fancy_orienteering) +
   theme_bw()
+
 ```
 
 Save
@@ -231,4 +195,4 @@ ggsave("AnthribidaeGuatemalaPointsDeptoGreen.jpg")
 
 ```
 
-Colores: amarillo #f5e267 verde #9cf536
+Colors: yellow #f5e267 green #9cf536
